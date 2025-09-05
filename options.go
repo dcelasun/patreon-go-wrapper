@@ -12,6 +12,7 @@ type options struct {
 	include string
 	size    int
 	cursor  string
+	v1api   bool
 }
 
 type requestOption func(*options)
@@ -49,6 +50,12 @@ func WithCursor(cursor string) requestOption {
 		}
 
 		o.cursor = cursor
+	}
+}
+
+func WithV1API() requestOption {
+	return func(o *options) {
+		o.v1api = true
 	}
 }
 

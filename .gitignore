@@ -16,3 +16,4 @@ test/
 coverage.txt
 
 *.env
+.idea/

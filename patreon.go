@@ -19,6 +19,9 @@ const (
 
 	// baseURL is the base url for api V2 (see https://docs.patreon.com/#apiv2-resource-endpoints).
 	baseURL = "https://patreon.com"
+
+	// baseURLV1 is the base url for api V1
+	baseURLV1 = "https://api.patreon.com"
 )
 
 // AllScopes is every scope possible for Oauth (see https://docs.patreon.com/#scopes).
@@ -65,6 +68,15 @@ func (c *Client) FetchIdentity(opts ...requestOption) (*UserResponse, error) {
 func (c *Client) FetchCampaign(campaignID string, opts ...requestOption) (*CampaignResponse, error) {
 	resp := &CampaignResponse{}
 	err := c.get(fmt.Sprintf("/api/oauth2/v2/campaigns/%s", campaignID), resp, opts...)
+	return resp, err
+}
+
+// FetchCampaignV1 is the single resource endpoint returns information about a single CampaignV1, fetched by campaign ID.
+// Requires the campaigns scope.
+func (c *Client) FetchCampaignV1(campaignID string, opts ...requestOption) (*CampaignV1Response, error) {
+	resp := &CampaignV1Response{}
+	opts = append(opts, WithV1API())
+	err := c.get(fmt.Sprintf("/oauth2/api/campaigns/%s", campaignID), resp, opts...)
 	return resp, err
 }
 
@@ -120,7 +132,12 @@ func (c *Client) FetchCampaignWebhooks(opts ...requestOption) (*WebhookResponse,
 func (c *Client) buildURL(path string, opts ...requestOption) (string, error) {
 	cfg := getOptions(opts...)
 
-	u, err := url.ParseRequestURI(c.baseURL + path)
+	base := c.baseURL
+	if cfg.v1api {
+		base = baseURLV1
+	}
+
+	u, err := url.ParseRequestURI(base + path)
 	if err != nil {
 		return "", err
 	}
